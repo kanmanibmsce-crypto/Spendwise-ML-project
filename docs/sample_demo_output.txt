@@ -1,0 +1,211 @@
+✓ Training data : data/training_labeled.csv (2750 labelled rows)
+✓ Bank statement: data/sample_bank_statement.csv (795 rows)
+
+========================================================================
+ Training transaction classifier (TF-IDF char n-grams + Logistic Regression)
+========================================================================
+Train rows: 2200   Test rows: 550
+Hold-out accuracy: 97.5%   ← AIPM metric: categorization accuracy
+
+F1 per category:
+  Bills & Utilities  0.941 ███████████████████
+  Entertainment      0.961 ███████████████████
+  Health             0.961 ███████████████████
+  Dining Out         0.969 ███████████████████
+  Rent               0.970 ███████████████████
+  Food Delivery      0.980 ████████████████████
+  Groceries          0.980 ████████████████████
+  Travel             0.980 ████████████████████
+  Education          0.990 ████████████████████
+  Shopping           0.990 ████████████████████
+  Transport          1.000 ████████████████████
+
+========================================================================
+ Uploaded data/sample_bank_statement.csv
+========================================================================
+Rows parsed       : 795  (783 expenses, 12 credits)
+Date range        : 2025-11-01 → 2026-10-31
+Auto-categorized  : 99.9% of expenses (avg confidence 0.97)
+Needs review      : 1 transactions → `spendwise transactions --uncategorized`
+Total stored      : 795 transactions in /home/claude/spendwise-ai/.spendwise/transactions.csv
+
+========================================================================
+ Monthly spending by category (last 6 months)
+========================================================================
+month              2026-05  2026-06  2026-07  2026-08  2026-09  2026-10    avg
+category                                                                      
+Rent                 22000    22000    22000    22000    22000    22000  22000
+Shopping              6059    56756     9262     9826     5216    12555  11759
+Groceries             7203     9371     6314     7045     6768     8658   7209
+Food Delivery         7604     6379     6384    10219     6202     8385   7111
+Transport             5666     6063     5780     6263     6057    10143   6246
+Dining Out            4618     4314     4603     2872     4055     3534   3823
+Bills & Utilities     3498     3141     3523     3312     3217     3398   3455
+Health                3080     2566     5083     4177     3516     2698   3242
+Travel                   0        0        0        0        0        0   2388
+Entertainment         1885     1178     2038     2139     2022     1052   1897
+Uncategorized            0        0        0        0        0        0   1250
+Education                0        0     4100        0        0        0    633
+
+========================================================================
+ Monthly total expenses
+========================================================================
+  2025-11     ₹61,594  ███████████████
+  2025-12     ₹82,799  █████████████████████
+  2026-01     ₹63,143  ████████████████
+  2026-02     ₹56,411  ██████████████
+  2026-03     ₹77,801  ███████████████████
+  2026-04     ₹68,607  █████████████████
+  2026-05     ₹61,614  ███████████████
+  2026-06    ₹111,769  ████████████████████████████
+  2026-07     ₹69,086  █████████████████
+  2026-08     ₹67,855  █████████████████
+  2026-09     ₹59,052  ███████████████
+  2026-10     ₹72,424  ██████████████████
+
+========================================================================
+ Spending behaviour clusters (KMeans on weekly profiles, k=4, silhouette=0.14)
+========================================================================
+• High-spend weeks, Travel-heavy          2 weeks | avg ₹16,962/wk | weekend 43% | last 4 wks: 0
+• High-spend weeks, Education-heavy       2 weeks | avg ₹12,017/wk | weekend 19% | last 4 wks: 0
+• Typical weeks, Shopping-heavy          24 weeks | avg ₹9,723/wk | weekend 29% | last 4 wks: 2
+• Low-spend weeks, Health-heavy          25 weeks | avg ₹6,640/wk | weekend 35% | last 4 wks: 2
+
+========================================================================
+ Recurring payments / subscriptions
+========================================================================
+  nobroker rent              ₹22,000/mo  seen 12 months  [Rent]
+  act fibernet                ₹1,179/mo  seen 12 months  [Bills & Utilities]
+  airtel postpaid               ₹799/mo  seen 12 months  [Bills & Utilities]
+  netflix                       ₹649/mo  seen 12 months  [Entertainment]
+  spotify                       ₹119/mo  seen 12 months  [Entertainment]
+
+========================================================================
+ Spend by weekday
+========================================================================
+  Monday       ₹119,034 ████████████████████
+  Tuesday       ₹98,368 ████████████████
+  Wednesday    ₹130,518 ██████████████████████
+  Thursday     ₹115,538 ███████████████████
+  Friday       ₹109,662 ██████████████████
+  Saturday     ₹109,707 ██████████████████
+  Sunday       ₹169,329 ████████████████████████████
+
+========================================================================
+ Unusual expenses (Isolation Forest + robust z-score) — 5 found
+========================================================================
+⚠ 2026-06-14    ₹48,999  VIN/CROMA/941975880239             [Shopping]
+    ↳ 26.0x your typical Shopping spend
+⚠ 2025-12-22    ₹14,200  BIL/ONL/920761467340/MAKEMYTRIP    [Travel]
+    ↳ 2.4x your typical Travel spend; first time at this merchant
+⚠ 2026-08-15     ₹3,850  UPI-ZOMATO-zomato96@okaxis-5506727 [Food Delivery]
+    ↳ 9.0x your typical Food Delivery spend
+⚠ 2026-10-22     ₹2,900  UPI-UBER INDIA-uberindia5@okaxis-4 [Transport]
+    ↳ 10.8x your typical Transport spend
+⚠ 2026-10-15     ₹4,443  UPI-Amazon In-amazonin41@okaxis-71 [Shopping]
+    ↳ 2.4x your typical Shopping spend
+
+========================================================================
+ Forecast for 2026-11
+========================================================================
+Predicted total : ₹62,713   (last month ₹65,080)
+Model chosen    : moving_avg_3  (lowest backtest MAE)
+Backtest MAE    : naive ₹5,088 | moving_avg_3 ₹2,512 | linear_trend ₹5,128
+Forecast error  : MAE ₹2,512  ≈ 4.0% of an average month  ← AIPM metric
+
+By category:
+  Rent                 ₹22,000 ████████████████████
+  Shopping              ₹7,718 ███████
+  Groceries             ₹7,490 ███████
+  Food Delivery         ₹6,985 ██████
+  Transport             ₹6,521 ██████
+  Dining Out            ₹3,487 ███
+  Health                ₹3,464 ███
+  Bills & Utilities     ₹3,309 ███
+  Entertainment         ₹1,738 ██
+  Education                 ₹0 
+  Travel                    ₹0 
+
+========================================================================
+ Budget suggestions based on 2026-10
+========================================================================
+Category             Last mo     Usual   Suggest     Save  Why
+Transport            ₹10,143    ₹6,057    ₹6,060   ₹4,090  essential, but up 67% — check for one-offs
+Shopping             ₹12,555    ₹9,262    ₹9,260   ₹3,290  up 36% vs your 3-month median — return to normal
+Food Delivery         ₹8,385    ₹6,384    ₹6,380   ₹2,000  up 31% vs your 3-month median — return to normal
+Groceries             ₹8,658    ₹6,768    ₹6,770   ₹1,890  essential, but up 28% — check for one-offs
+Bills & Utilities     ₹3,398    ₹3,312    ₹3,400       ₹0  essential: keep at your usual level
+Dining Out            ₹3,534    ₹4,055    ₹3,650       ₹0  discretionary: 10% trim is usually painless
+Education                 ₹0        ₹0        ₹0       ₹0  essential: keep at your usual level
+Entertainment         ₹1,052    ₹2,038    ₹1,830       ₹0  discretionary: 10% trim is usually painless
+Health                ₹2,698    ₹4,177    ₹4,180       ₹0  essential: keep at your usual level
+Rent                 ₹22,000   ₹22,000   ₹22,000       ₹0  essential: keep at your usual level
+Travel                    ₹0        ₹0        ₹0       ₹0  discretionary: 10% trim is usually painless
+
+Potential monthly saving: ₹11,270
+50/30/20 check (income ₹95,000): needs 49% | wants 27% | savings 24%  (target 50/30/20)
+
+Run `spendwise budget --accept` to adopt these budgets.
+
+========================================================================
+ you › Why did my expenses increase this month?
+========================================================================
+
+🤖 Your expenses increased by 23% in 2026-10 compared with 2026-09 (₹59,052 → ₹72,424). The main contributors were shopping, transport and food delivery. Shopping spending increased by 141% (₹5,216 → ₹12,555).
+
+   [intent: expense_change | engine: template]
+
+========================================================================
+ you › How much did I spend on food delivery?
+========================================================================
+
+🤖 In 2026-10 you spent ₹8,385 on Food Delivery across 19 transactions (avg ₹441 each). That is +10% vs your previous 3-month average of ₹7,602.
+
+   [intent: category_spend | engine: template]
+
+========================================================================
+ you › Anything unusual in my spending?
+========================================================================
+
+🤖 I found 5 unusual transaction(s):
+- 2026-06-14: ₹48,999 at VIN/CROMA/941975880239 (26.0x your typical Shopping spend)
+- 2025-12-22: ₹14,200 at BIL/ONL/920761467340/MAKEMYTRIP (2.4x your typical Travel spend; first time at this merchant)
+- 2026-08-15: ₹3,850 at UPI-ZOMATO-zomato96@okaxis-550672795354 (9.0x your typical Food Delivery spend)
+- 2026-10-22: ₹2,900 at UPI-UBER INDIA-uberindia5@okaxis-453704326218 (10.8x your typical Transport spend)
+- 2026-10-15: ₹4,443 at UPI-Amazon In-amazonin41@okaxis-719383157138 (2.4x your typical Shopping spend)
+
+   [intent: anomalies | engine: template]
+
+========================================================================
+ you › How much will I spend next month?
+========================================================================
+
+🤖 I expect you to spend about ₹62,713 in 2026-11 (last month: ₹65,080). Biggest buckets: Rent ₹22,000, Shopping ₹7,718, Groceries ₹7,490. Typical error of this model is ±₹2,512 (4%).
+
+   [intent: forecast | engine: template]
+
+========================================================================
+ AIPM metrics dashboard
+========================================================================
+Model quality Categorization accuracy (hold-out)             97.5%
+Model quality User correction rate (online proxy)             0.0%
+Model quality Uncategorized rate                              0.1%
+Model quality Forecast MAE                                  ₹2,512
+Model quality Forecast MAPE                                   4.0%
+Outcome       Budget adherence rate                              —
+Outcome       % recommended actions taken                     0.0%
+Engagement    Monthly active users                               1
+Engagement    Active days (30d)                                  1
+Engagement    Questions asked                                    4
+Engagement    LLM-answered share                              0.0%
+Engagement    Answer helpful rate (/good vs /bad)                —
+
+Feature usage (events):
+  question_asked                4
+  model_trained                 1
+  csv_uploaded                  1
+  summary_viewed                1
+  patterns_viewed               1
+  anomalies_viewed              1
+  forecast_viewed               1
+  recommendations_shown         1

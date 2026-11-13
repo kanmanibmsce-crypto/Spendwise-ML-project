@@ -1,0 +1,9 @@
+.spendwise/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+ss_*.png
+*_screenshot.png
+anomalies_screenshot.png
