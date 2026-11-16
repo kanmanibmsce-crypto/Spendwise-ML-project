@@ -620,6 +620,67 @@ hr { border: none !important; border-top: 1px solid rgba(255,255,255,.05) !impor
 /* ── Checkbox ───────────────────────────────────────────────────── */
 [data-testid="stCheckbox"] span { color: #9999b8 !important; font-size: 1rem !important; }
 
+/* ── Profile hero banner ────────────────────────────────────────── */
+.profile-hero {
+    position: relative; border-radius: 24px; overflow: hidden;
+    margin-bottom: 1.8rem;
+    border: 1px solid rgba(255,79,31,.2);
+    background: #1e1e2e;
+}
+.profile-hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,79,31,.18) 0%, rgba(255,140,66,.08) 50%, transparent 100%);
+}
+.profile-hero-content {
+    position: relative; display: flex; align-items: center;
+    gap: 1.8rem; padding: 2rem 2.4rem;
+}
+.profile-hero-avatar { position: relative; flex-shrink: 0; }
+.profile-hero-dot {
+    position: absolute; bottom: 4px; right: 4px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #22c55e; border: 3px solid #1e1e2e;
+}
+.profile-hero-name {
+    font-size: 2rem !important; font-weight: 800; color: #f0f0f5;
+    letter-spacing: -.03em; line-height: 1;
+}
+.profile-hero-role {
+    font-size: 1rem !important; color: #6868a0; margin-top: .5rem;
+}
+.profile-hero-meta {
+    font-size: .88rem !important; color: #3a3a5a; margin-top: .3rem;
+}
+
+/* ── Settings card ───────────────────────────────────────────────── */
+.settings-card {
+    background: #1e1e2e;
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 18px; padding: 1.6rem 1.8rem;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────── */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background: #1e1e2e !important; border-radius: 12px; padding: .3rem;
+    border: 1px solid rgba(255,255,255,.05);
+    gap: .3rem;
+}
+[data-testid="stTabs"] [data-baseweb="tab"] {
+    border-radius: 9px !important; font-size: 1rem !important;
+    font-weight: 600 !important; color: #6868a0 !important;
+    padding: .55rem 1.3rem !important; background: transparent !important;
+    transition: background .15s, color .15s !important;
+}
+[data-testid="stTabs"] [data-baseweb="tab"]:hover {
+    background: rgba(255,79,31,.12) !important; color: #ff7050 !important;
+}
+[data-testid="stTabs"] [aria-selected="true"] {
+    background: rgba(255,79,31,.2) !important;
+    color: #ff4f1f !important;
+}
+[data-testid="stTabs"] [data-baseweb="tab-highlight"] { display: none !important; }
+[data-testid="stTabs"] [data-baseweb="tab-border"]    { display: none !important; }
+
 /* ── Dashboard search + date filter bar ────────────────────────── */
 .search-bar-wrap {
     background: #1e1e2e;
@@ -1717,40 +1778,62 @@ elif page == "Profile":
 
     current_user = st.session_state.get("logged_in_user", "")
     USERS = _load_users()
-
-    # ── Avatar + account summary ───────────────────────────────────
     initial = current_user[0].upper() if current_user else "M"
+
+    # ── Hero banner ────────────────────────────────────────────────
     st.markdown(f"""
-<div style="display:flex;align-items:center;gap:1.4rem;
-            background:#1e1e2e;border:1px solid rgba(255,79,31,.2);
-            border-radius:20px;padding:1.6rem 2rem;margin-bottom:1.6rem;">
-  <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="36" cy="36" r="36" fill="url(#psGrad)"/>
-    <text x="36" y="45" text-anchor="middle"
-          font-family="Inter,Segoe UI,sans-serif" font-size="28" font-weight="800"
-          fill="white">{initial}</text>
-    <defs>
-      <linearGradient id="psGrad" x1="0" y1="0" x2="72" y2="72" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="#ff4f1f"/>
-        <stop offset="100%" stop-color="#ff8c42"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div>
-    <div style="font-size:1.5rem;font-weight:800;color:#f0f0f5">{current_user}</div>
-    <div style="font-size:.95rem;color:#6868a0;margin-top:.3rem">Finance User &nbsp;·&nbsp;
-      <span style="color:#22c55e;font-weight:600">● Active</span></div>
-    <div style="font-size:.85rem;color:#3a3a5a;margin-top:.25rem">
-      Account since 2026 &nbsp;·&nbsp; SpendWise Personal</div>
+<div class="profile-hero">
+  <div class="profile-hero-bg"></div>
+  <div class="profile-hero-content">
+    <div class="profile-hero-avatar">
+      <svg width="90" height="90" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="45" cy="45" r="45" fill="url(#phGrad)"/>
+        <text x="45" y="57" text-anchor="middle"
+              font-family="Inter,Segoe UI,sans-serif" font-size="34" font-weight="800"
+              fill="white">{initial}</text>
+        <defs>
+          <linearGradient id="phGrad" x1="0" y1="0" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ff4f1f"/>
+            <stop offset="100%" stop-color="#ff8c42"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="profile-hero-dot"></span>
+    </div>
+    <div class="profile-hero-info">
+      <div class="profile-hero-name">{current_user}</div>
+      <div class="profile-hero-role">Finance User &nbsp;·&nbsp;
+        <span style="color:#22c55e;font-weight:700">● Active</span></div>
+      <div class="profile-hero-meta">Member since 2026 &nbsp;·&nbsp; SpendWise Personal Plan</div>
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-    tab1, tab2 = st.tabs(["✏️  Edit Profile", "🔒  Change Password"])
+    # ── Stats row ──────────────────────────────────────────────────
+    exp_all = expenses(df)
+    total_txns  = len(exp_all)
+    total_spent = exp_all["amount"].sum()
+    months_active = exp_all["month"].nunique()
+
+    s1, s2, s3 = st.columns(3)
+    with s1:
+        kpi_card("Total transactions", str(total_txns), "", "💳")
+    with s2:
+        kpi_card("Total spent", fmt_inr(total_spent), "", "💸")
+    with s3:
+        kpi_card("Months tracked", str(months_active), "", "📅")
+
+    st.divider()
+
+    # ── Settings tabs ──────────────────────────────────────────────
+    tab1, tab2, tab3 = st.tabs(["✏️  Edit Profile", "🔒  Change Password", "⚙️  Preferences"])
 
     # ── Tab 1 : Edit Profile ───────────────────────────────────────
     with tab1:
         st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="settings-card">', unsafe_allow_html=True)
+        sec_header("Personal Information")
         col_a, col_b = st.columns(2)
         with col_a:
             new_display = st.text_input("Display name", value=current_user,
@@ -1758,12 +1841,15 @@ elif page == "Profile":
         with col_b:
             new_username = st.text_input("Username", value=current_user,
                                          placeholder="Choose a username", key="ps_username")
+        col_c, col_d = st.columns(2)
+        with col_c:
+            st.text_input("Email (optional)", placeholder="your@email.com", key="ps_email")
+        with col_d:
+            st.text_input("Phone (optional)", placeholder="+91 00000 00000", key="ps_phone")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        st.text_input("Email (optional)", placeholder="your@email.com", key="ps_email")
-        st.selectbox("Currency", ["₹ INR", "$ USD", "€ EUR", "£ GBP"], key="ps_currency")
-
-        st.write("")
-        if st.button("💾  Save Profile", type="primary", use_container_width=False, key="ps_save"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("💾  Save Profile", type="primary", key="ps_save"):
             new_u = new_username.strip()
             if not new_u:
                 st.error("Username cannot be empty.")
@@ -1780,21 +1866,27 @@ elif page == "Profile":
     # ── Tab 2 : Change Password ────────────────────────────────────
     with tab2:
         st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="settings-card">', unsafe_allow_html=True)
+        sec_header("Update Password")
+
         cur_pass  = st.text_input("Current password", type="password",
                                    placeholder="Enter current password", key="ps_cur")
-        new_pass  = st.text_input("New password", type="password",
-                                   placeholder="Min 6 characters", key="ps_new")
-        conf_pass = st.text_input("Confirm new password", type="password",
-                                   placeholder="Re-enter new password", key="ps_conf")
+        col_e, col_f = st.columns(2)
+        with col_e:
+            new_pass  = st.text_input("New password", type="password",
+                                       placeholder="Min 6 characters", key="ps_new")
+        with col_f:
+            conf_pass = st.text_input("Confirm new password", type="password",
+                                       placeholder="Re-enter new password", key="ps_conf")
 
         st.markdown("""
-<div style="background:rgba(255,79,31,.07);border:1px solid rgba(255,79,31,.2);
-            border-radius:10px;padding:.8rem 1rem;margin:.8rem 0;font-size:.9rem;color:#ff9070;">
-  🔒 Use at least 6 characters with a mix of letters and numbers.
+<div class="info-banner" style="margin-top:.6rem">
+  🔒 Use at least 6 characters with a mix of letters and numbers for a strong password.
 </div>""", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        st.write("")
-        if st.button("🔑  Update Password", type="primary", use_container_width=False, key="ps_pw_save"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🔑  Update Password", type="primary", key="ps_pw_save"):
             if not cur_pass:
                 st.error("Please enter your current password.")
             elif USERS.get(current_user) != _hash(cur_pass):
@@ -1802,10 +1894,28 @@ elif page == "Profile":
             elif len(new_pass) < 6:
                 st.error("New password must be at least 6 characters.")
             elif new_pass != conf_pass:
-                st.error("New passwords do not match.")
+                st.error("Passwords do not match.")
             elif _hash(new_pass) == USERS.get(current_user):
-                st.error("New password must differ from the current one.")
+                st.error("New password must be different from the current one.")
             else:
                 USERS[current_user] = _hash(new_pass)
                 _save_users(USERS)
                 st.success("✅ Password updated successfully.")
+
+    # ── Tab 3 : Preferences ───────────────────────────────────────
+    with tab3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="settings-card">', unsafe_allow_html=True)
+        sec_header("App Preferences")
+        col_g, col_h = st.columns(2)
+        with col_g:
+            st.selectbox("Currency", ["₹ INR", "$ USD", "€ EUR", "£ GBP"], key="ps_currency")
+            st.selectbox("Date format", ["DD MMM YYYY", "MM/DD/YYYY", "YYYY-MM-DD"], key="ps_datefmt")
+        with col_h:
+            st.selectbox("Language", ["English", "Hindi", "Tamil", "Telugu"], key="ps_lang")
+            st.selectbox("Default page", ["Dashboard", "Transactions", "Budget"], key="ps_defpage")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("💾  Save Preferences", type="primary", key="ps_pref_save"):
+            st.success("✅ Preferences saved.")
