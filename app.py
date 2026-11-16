@@ -20,70 +20,60 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Credentials store ────────────────────────────────────────────────────────
-USERS = {
-    "admin":      "spendwise123",
-    "spendwise":  "finance@2026",
-}
+# ── Credentials store (file-backed) ──────────────────────────────────────────
+import json, hashlib
 
-# ── Auth gate ─────────────────────────────────────────────────────────────────
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
+CREDS_FILE = Path(__file__).parent / ".streamlit" / "users.json"
 
-if not st.session_state.authenticated:
-    st.markdown("""
+def _load_users():
+    if CREDS_FILE.exists():
+        return json.loads(CREDS_FILE.read_text())
+    # seed default accounts on first run
+    defaults = {
+        "admin":     hashlib.sha256("spendwise123".encode()).hexdigest(),
+        "spendwise": hashlib.sha256("finance@2026".encode()).hexdigest(),
+    }
+    CREDS_FILE.write_text(json.dumps(defaults, indent=2))
+    return defaults
+
+def _save_users(users: dict):
+    CREDS_FILE.write_text(json.dumps(users, indent=2))
+
+def _hash(pw: str) -> str:
+    return hashlib.sha256(pw.encode()).hexdigest()
+
+# ── Shared auth page CSS ───────────────────────────────────────────────────────
+AUTH_CSS = """
 <style>
 html, body, .stApp { background: #13131f; font-family: 'Inter','Segoe UI',sans-serif; }
-.login-wrap {
-    max-width: 420px; margin: 6vh auto 0; padding: 2.5rem 2.5rem 2rem;
-    background: #1e1e2e;
-    border: 1px solid rgba(255,79,31,.25);
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+.auth-card {
+    max-width: 440px; margin: 5vh auto 0; padding: 2.6rem 2.5rem 2rem;
+    background: #1e1e2e; border: 1px solid rgba(255,79,31,.25);
+    border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.5);
 }
-.login-logo {
-    display: flex; align-items: center; gap: .75rem;
-    justify-content: center; margin-bottom: 1.8rem;
-}
-.login-brand {
-    font-size: 2rem; font-weight: 800; color: #f0f0f5; letter-spacing: -.03em;
-}
-.login-brand span { color: #ff4f1f; }
-.login-title {
-    font-size: 1.3rem; font-weight: 700; color: #f0f0f5;
-    text-align: center; margin-bottom: .3rem;
-}
-.login-sub {
-    font-size: .92rem; color: #6868a0;
-    text-align: center; margin-bottom: 1.8rem;
-}
-.login-divider {
-    border: none; border-top: 1px solid rgba(255,255,255,.07); margin: 1.4rem 0;
-}
-.login-footer {
-    text-align: center; font-size: .8rem; color: #3a3a5a; margin-top: 1.2rem;
-}
-/* Input styling */
+.auth-logo { display:flex; align-items:center; gap:.75rem; justify-content:center; margin-bottom:1.8rem; }
+.auth-brand { font-size:2rem; font-weight:800; color:#f0f0f5; letter-spacing:-.03em; }
+.auth-brand span { color:#ff4f1f; }
+.auth-title { font-size:1.3rem; font-weight:700; color:#f0f0f5; text-align:center; margin-bottom:.3rem; }
+.auth-sub   { font-size:.92rem; color:#6868a0; text-align:center; margin-bottom:1.8rem; }
+.auth-switch { text-align:center; font-size:.92rem; color:#6868a0; margin-top:1.2rem; }
+.auth-switch a { color:#ff4f1f; font-weight:600; text-decoration:none; cursor:pointer; }
+.auth-footer { text-align:center; font-size:.8rem; color:#3a3a5a; margin-top:1.4rem; }
+.pw-rule { font-size:.82rem; color:#55557a; margin-top:.3rem; }
 input[type="text"], input[type="password"] {
-    background: #13131f !important;
-    border: 1.5px solid rgba(255,79,31,.3) !important;
-    border-radius: 10px !important;
-    color: #f0f0f5 !important;
-    font-size: 1rem !important;
-    padding: .6rem 1rem !important;
+    background: #13131f !important; border: 1.5px solid rgba(255,79,31,.3) !important;
+    border-radius: 10px !important; color: #f0f0f5 !important;
+    font-size: 1rem !important; padding: .6rem 1rem !important;
 }
 input[type="text"]:focus, input[type="password"]:focus {
-    border-color: #ff4f1f !important;
-    box-shadow: 0 0 0 3px rgba(255,79,31,.18) !important;
+    border-color: #ff4f1f !important; box-shadow: 0 0 0 3px rgba(255,79,31,.18) !important;
 }
 label { color: #9898c0 !important; font-size: .95rem !important; }
-/* Login button */
 .stButton > button[kind="primary"] {
     background: linear-gradient(135deg,#ff4f1f,#ff7a3d) !important;
     border: none !important; color: #fff !important;
     font-size: 1.05rem !important; font-weight: 700 !important;
     border-radius: 12px !important; padding: .65rem 1rem !important;
-    width: 100% !important;
     box-shadow: 0 4px 18px rgba(255,79,31,.4) !important;
     transition: transform .2s, box-shadow .2s !important;
 }
@@ -91,52 +81,115 @@ label { color: #9898c0 !important; font-size: .95rem !important; }
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 28px rgba(255,79,31,.55) !important;
 }
+.stButton > button[kind="secondary"] {
+    background: transparent !important; border: 1.5px solid rgba(255,79,31,.35) !important;
+    color: #ff7050 !important; font-size:1rem !important; font-weight:600 !important;
+    border-radius:12px !important;
+}
 </style>
-""", unsafe_allow_html=True)
+"""
 
-    st.markdown("""
-<div class="login-wrap">
-  <div class="login-logo">
-    <svg width="40" height="40" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="42" height="42" rx="12" fill="url(#lg)"/>
-      <polyline points="7,30 14,21 20,25 27,14 35,18"
-                stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <circle cx="35" cy="18" r="2.5" fill="white"/>
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#ff4f1f"/>
-          <stop offset="100%" stop-color="#ff8c42"/>
-        </linearGradient>
-      </defs>
-    </svg>
-    <div class="login-brand">Spend<span>Wise</span></div>
+AUTH_LOGO = """
+<svg width="40" height="40" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="42" height="42" rx="12" fill="url(#alg)"/>
+  <polyline points="7,30 14,21 20,25 27,14 35,18"
+            stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="35" cy="18" r="2.5" fill="white"/>
+  <defs>
+    <linearGradient id="alg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff4f1f"/>
+      <stop offset="100%" stop-color="#ff8c42"/>
+    </linearGradient>
+  </defs>
+</svg>
+"""
+
+AUTH_FOOTER = """
+<div class="auth-footer">© 2026 SpendWise &nbsp;·&nbsp; Personal Finance Intelligence</div>
+"""
+
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "auth_page" not in st.session_state:
+    st.session_state.auth_page = "login"
+
+if not st.session_state.authenticated:
+    USERS = _load_users()
+    st.markdown(AUTH_CSS, unsafe_allow_html=True)
+
+    # ── LOGIN PAGE ────────────────────────────────────────────────
+    if st.session_state.auth_page == "login":
+        st.markdown(f"""
+<div class="auth-card">
+  <div class="auth-logo">{AUTH_LOGO}
+    <div class="auth-brand">Spend<span>Wise</span></div>
   </div>
-  <div class="login-title">Welcome back</div>
-  <div class="login-sub">Sign in to your finance dashboard</div>
-</div>
-""", unsafe_allow_html=True)
+  <div class="auth-title">Welcome back 👋</div>
+  <div class="auth-sub">Sign in to your finance dashboard</div>
+</div>""", unsafe_allow_html=True)
 
-    with st.container():
         _, mid, _ = st.columns([1, 2.5, 1])
         with mid:
-            username = st.text_input("Username", placeholder="Enter username", key="login_user")
-            password = st.text_input("Password", placeholder="Enter password", type="password", key="login_pass")
+            lu = st.text_input("Username", placeholder="Enter username", key="li_user")
+            lp = st.text_input("Password", placeholder="Enter password", type="password", key="li_pass")
             st.write("")
-            login_btn = st.button("Sign In →", type="primary", use_container_width=True)
-
-            if login_btn:
-                if username in USERS and USERS[username] == password:
+            if st.button("Sign In →", type="primary", use_container_width=True, key="li_btn"):
+                if lu in USERS and USERS[lu] == _hash(lp):
                     st.session_state.authenticated = True
-                    st.session_state.logged_in_user = username
+                    st.session_state.logged_in_user = lu
                     st.rerun()
                 else:
-                    st.error("Invalid username or password.")
+                    st.error("❌ Invalid username or password.")
+            st.write("")
+            if st.button("Create a new account", use_container_width=True, key="go_signup"):
+                st.session_state.auth_page = "signup"
+                st.rerun()
 
-    st.markdown("""
-<div style="text-align:center;margin-top:1.5rem;font-size:.82rem;color:#3a3a5a;">
-  © 2026 SpendWise &nbsp;·&nbsp; Personal Finance Intelligence
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(AUTH_FOOTER, unsafe_allow_html=True)
+
+    # ── SIGN-UP PAGE ──────────────────────────────────────────────
+    elif st.session_state.auth_page == "signup":
+        st.markdown(f"""
+<div class="auth-card">
+  <div class="auth-logo">{AUTH_LOGO}
+    <div class="auth-brand">Spend<span>Wise</span></div>
+  </div>
+  <div class="auth-title">Create account 🚀</div>
+  <div class="auth-sub">Join SpendWise and take control of your finances</div>
+</div>""", unsafe_allow_html=True)
+
+        _, mid, _ = st.columns([1, 2.5, 1])
+        with mid:
+            su_name = st.text_input("Full name", placeholder="Your display name", key="su_name")
+            su_user = st.text_input("Username", placeholder="Choose a username", key="su_user")
+            su_pass = st.text_input("Password", placeholder="Min 6 characters", type="password", key="su_pass")
+            su_conf = st.text_input("Confirm password", placeholder="Re-enter password", type="password", key="su_conf")
+            st.markdown('<div class="pw-rule">Password must be at least 6 characters.</div>', unsafe_allow_html=True)
+            st.write("")
+
+            if st.button("Create Account →", type="primary", use_container_width=True, key="su_btn"):
+                if not su_user.strip() or not su_pass.strip():
+                    st.error("Username and password are required.")
+                elif len(su_pass) < 6:
+                    st.error("Password must be at least 6 characters.")
+                elif su_pass != su_conf:
+                    st.error("Passwords do not match.")
+                elif su_user in USERS:
+                    st.error(f"Username **{su_user}** is already taken. Choose another.")
+                else:
+                    USERS[su_user] = _hash(su_pass)
+                    _save_users(USERS)
+                    st.success(f"✅ Account created for **{su_user}**! You can now sign in.")
+                    st.session_state.auth_page = "login"
+                    st.rerun()
+
+            st.write("")
+            if st.button("← Back to Sign In", use_container_width=True, key="go_login"):
+                st.session_state.auth_page = "login"
+                st.rerun()
+
+        st.markdown(AUTH_FOOTER, unsafe_allow_html=True)
 
     st.stop()
 
