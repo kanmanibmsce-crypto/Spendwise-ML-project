@@ -86,6 +86,15 @@ label { color: #9898c0 !important; font-size: .95rem !important; }
     color: #ff7050 !important; font-size:1rem !important; font-weight:600 !important;
     border-radius:12px !important;
 }
+/* Forgot password — looks like a text link */
+button[data-testid="baseButton-secondary"][kind="secondary"]:has(div:contains("Forgot")) ,
+[data-testid="stButton"]:has(button[key="go_forgot"]) button {
+    background: transparent !important; border: none !important;
+    color: #ff4f1f !important; font-size:.9rem !important;
+    font-weight:600 !important; padding:0 !important;
+    text-decoration: underline !important; box-shadow:none !important;
+    width:auto !important;
+}
 </style>
 """
 
@@ -141,6 +150,19 @@ if not st.session_state.authenticated:
                     st.rerun()
                 else:
                     st.error("❌ Invalid username or password.")
+
+            # Forgot password link
+            st.markdown(
+                '<div style="text-align:right;margin-top:.4rem">'
+                '<span style="color:#ff4f1f;font-size:.9rem;cursor:pointer;font-weight:600"'
+                ' id="fp_link">Forgot password?</span></div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("Forgot password?", use_container_width=False, key="go_forgot",
+                         help="Reset your password"):
+                st.session_state.auth_page = "forgot"
+                st.rerun()
+
             st.write("")
             if st.button("Create a new account", use_container_width=True, key="go_signup"):
                 st.session_state.auth_page = "signup"
@@ -186,6 +208,51 @@ if not st.session_state.authenticated:
 
             st.write("")
             if st.button("← Back to Sign In", use_container_width=True, key="go_login"):
+                st.session_state.auth_page = "login"
+                st.rerun()
+
+        st.markdown(AUTH_FOOTER, unsafe_allow_html=True)
+
+    # ── FORGOT PASSWORD PAGE ──────────────────────────────────────
+    elif st.session_state.auth_page == "forgot":
+        st.markdown(f"""
+<div class="auth-card">
+  <div class="auth-logo">{AUTH_LOGO}
+    <div class="auth-brand">Spend<span>Wise</span></div>
+  </div>
+  <div class="auth-title">Reset Password 🔑</div>
+  <div class="auth-sub">Enter your username and choose a new password</div>
+</div>""", unsafe_allow_html=True)
+
+        _, mid, _ = st.columns([1, 2.5, 1])
+        with mid:
+            fp_user = st.text_input("Username", placeholder="Enter your username", key="fp_user")
+            fp_new  = st.text_input("New password", placeholder="Min 6 characters",
+                                    type="password", key="fp_new")
+            fp_conf = st.text_input("Confirm new password", placeholder="Re-enter new password",
+                                    type="password", key="fp_conf")
+            st.markdown('<div class="pw-rule">Password must be at least 6 characters.</div>',
+                        unsafe_allow_html=True)
+            st.write("")
+
+            if st.button("Reset Password →", type="primary", use_container_width=True, key="fp_btn"):
+                if not fp_user.strip():
+                    st.error("Please enter your username.")
+                elif fp_user not in USERS:
+                    st.error(f"No account found for **{fp_user}**.")
+                elif len(fp_new) < 6:
+                    st.error("Password must be at least 6 characters.")
+                elif fp_new != fp_conf:
+                    st.error("Passwords do not match.")
+                else:
+                    USERS[fp_user] = _hash(fp_new)
+                    _save_users(USERS)
+                    st.success(f"✅ Password reset for **{fp_user}**. You can now sign in.")
+                    st.session_state.auth_page = "login"
+                    st.rerun()
+
+            st.write("")
+            if st.button("← Back to Sign In", use_container_width=True, key="fp_back"):
                 st.session_state.auth_page = "login"
                 st.rerun()
 
