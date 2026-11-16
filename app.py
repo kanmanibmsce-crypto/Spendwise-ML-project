@@ -20,6 +20,126 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ── Credentials store ────────────────────────────────────────────────────────
+USERS = {
+    "admin":      "spendwise123",
+    "spendwise":  "finance@2026",
+}
+
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.markdown("""
+<style>
+html, body, .stApp { background: #13131f; font-family: 'Inter','Segoe UI',sans-serif; }
+.login-wrap {
+    max-width: 420px; margin: 6vh auto 0; padding: 2.5rem 2.5rem 2rem;
+    background: #1e1e2e;
+    border: 1px solid rgba(255,79,31,.25);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.login-logo {
+    display: flex; align-items: center; gap: .75rem;
+    justify-content: center; margin-bottom: 1.8rem;
+}
+.login-brand {
+    font-size: 2rem; font-weight: 800; color: #f0f0f5; letter-spacing: -.03em;
+}
+.login-brand span { color: #ff4f1f; }
+.login-title {
+    font-size: 1.3rem; font-weight: 700; color: #f0f0f5;
+    text-align: center; margin-bottom: .3rem;
+}
+.login-sub {
+    font-size: .92rem; color: #6868a0;
+    text-align: center; margin-bottom: 1.8rem;
+}
+.login-divider {
+    border: none; border-top: 1px solid rgba(255,255,255,.07); margin: 1.4rem 0;
+}
+.login-footer {
+    text-align: center; font-size: .8rem; color: #3a3a5a; margin-top: 1.2rem;
+}
+/* Input styling */
+input[type="text"], input[type="password"] {
+    background: #13131f !important;
+    border: 1.5px solid rgba(255,79,31,.3) !important;
+    border-radius: 10px !important;
+    color: #f0f0f5 !important;
+    font-size: 1rem !important;
+    padding: .6rem 1rem !important;
+}
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #ff4f1f !important;
+    box-shadow: 0 0 0 3px rgba(255,79,31,.18) !important;
+}
+label { color: #9898c0 !important; font-size: .95rem !important; }
+/* Login button */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg,#ff4f1f,#ff7a3d) !important;
+    border: none !important; color: #fff !important;
+    font-size: 1.05rem !important; font-weight: 700 !important;
+    border-radius: 12px !important; padding: .65rem 1rem !important;
+    width: 100% !important;
+    box-shadow: 0 4px 18px rgba(255,79,31,.4) !important;
+    transition: transform .2s, box-shadow .2s !important;
+}
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(255,79,31,.55) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+    st.markdown("""
+<div class="login-wrap">
+  <div class="login-logo">
+    <svg width="40" height="40" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="42" height="42" rx="12" fill="url(#lg)"/>
+      <polyline points="7,30 14,21 20,25 27,14 35,18"
+                stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="35" cy="18" r="2.5" fill="white"/>
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#ff4f1f"/>
+          <stop offset="100%" stop-color="#ff8c42"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="login-brand">Spend<span>Wise</span></div>
+  </div>
+  <div class="login-title">Welcome back</div>
+  <div class="login-sub">Sign in to your finance dashboard</div>
+</div>
+""", unsafe_allow_html=True)
+
+    with st.container():
+        _, mid, _ = st.columns([1, 2.5, 1])
+        with mid:
+            username = st.text_input("Username", placeholder="Enter username", key="login_user")
+            password = st.text_input("Password", placeholder="Enter password", type="password", key="login_pass")
+            st.write("")
+            login_btn = st.button("Sign In →", type="primary", use_container_width=True)
+
+            if login_btn:
+                if username in USERS and USERS[username] == password:
+                    st.session_state.authenticated = True
+                    st.session_state.logged_in_user = username
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password.")
+
+    st.markdown("""
+<div style="text-align:center;margin-top:1.5rem;font-size:.82rem;color:#3a3a5a;">
+  © 2026 SpendWise &nbsp;·&nbsp; Personal Finance Intelligence
+</div>
+""", unsafe_allow_html=True)
+
+    st.stop()
+
 # ── Theme state (must come before CSS injection) ─────────────────────────────
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = True
@@ -804,7 +924,8 @@ with st.sidebar:
 </div>
 """, unsafe_allow_html=True)
     if st.button("⏻  Log out", use_container_width=True, key="logout_btn"):
-        st.session_state.clear()
+        st.session_state.authenticated = False
+        st.session_state.logged_in_user = ""
         st.rerun()
 
 df = get_data()
