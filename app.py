@@ -167,7 +167,7 @@ p, li, span, div, label, td, th {
 [data-testid="stRadio"] label {
     padding: .7rem 1.1rem !important; border-radius: 10px !important;
     font-size: 1.15rem !important; font-weight: 500 !important;
-    color: #7070a0 !important; cursor: pointer;
+    color: #c8c8e8 !important; cursor: pointer;
     transition: background .15s, color .15s;
 }
 [data-testid="stRadio"] label:hover {
