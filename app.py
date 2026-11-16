@@ -939,7 +939,7 @@ with st.sidebar:
 
     page = st.radio(
         "nav",
-        ["Dashboard", "Transactions", "Review", "Patterns", "Anomalies", "Forecast", "Budget", "Ask AI"],
+        ["Dashboard", "Transactions", "Review", "Patterns", "Anomalies", "Forecast", "Budget", "Ask AI", "Profile"],
         label_visibility="collapsed",
         format_func=lambda x: {
             "Dashboard":    "🏠  Dashboard",
@@ -950,6 +950,7 @@ with st.sidebar:
             "Forecast":     "🔮  Forecast",
             "Budget":       "🎯  Budget",
             "Ask AI":       "🤖  Ask AI",
+            "Profile":      "👤  Profile",
         }.get(x, x),
     )
 
@@ -1706,3 +1707,105 @@ elif page == "Ask AI":
         for q, a in reversed(st.session_state.history[-5:]):
             with st.expander(q):
                 st.write(a)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PROFILE SETTINGS
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "Profile":
+    page_title("👤", "Profile Settings", "Manage your account details and security")
+
+    current_user = st.session_state.get("logged_in_user", "")
+    USERS = _load_users()
+
+    # ── Avatar + account summary ───────────────────────────────────
+    initial = current_user[0].upper() if current_user else "M"
+    st.markdown(f"""
+<div style="display:flex;align-items:center;gap:1.4rem;
+            background:#1e1e2e;border:1px solid rgba(255,79,31,.2);
+            border-radius:20px;padding:1.6rem 2rem;margin-bottom:1.6rem;">
+  <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="36" cy="36" r="36" fill="url(#psGrad)"/>
+    <text x="36" y="45" text-anchor="middle"
+          font-family="Inter,Segoe UI,sans-serif" font-size="28" font-weight="800"
+          fill="white">{initial}</text>
+    <defs>
+      <linearGradient id="psGrad" x1="0" y1="0" x2="72" y2="72" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#ff4f1f"/>
+        <stop offset="100%" stop-color="#ff8c42"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <div>
+    <div style="font-size:1.5rem;font-weight:800;color:#f0f0f5">{current_user}</div>
+    <div style="font-size:.95rem;color:#6868a0;margin-top:.3rem">Finance User &nbsp;·&nbsp;
+      <span style="color:#22c55e;font-weight:600">● Active</span></div>
+    <div style="font-size:.85rem;color:#3a3a5a;margin-top:.25rem">
+      Account since 2026 &nbsp;·&nbsp; SpendWise Personal</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    tab1, tab2 = st.tabs(["✏️  Edit Profile", "🔒  Change Password"])
+
+    # ── Tab 1 : Edit Profile ───────────────────────────────────────
+    with tab1:
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_a, col_b = st.columns(2)
+        with col_a:
+            new_display = st.text_input("Display name", value=current_user,
+                                        placeholder="Your display name", key="ps_display")
+        with col_b:
+            new_username = st.text_input("Username", value=current_user,
+                                         placeholder="Choose a username", key="ps_username")
+
+        st.text_input("Email (optional)", placeholder="your@email.com", key="ps_email")
+        st.selectbox("Currency", ["₹ INR", "$ USD", "€ EUR", "£ GBP"], key="ps_currency")
+
+        st.write("")
+        if st.button("💾  Save Profile", type="primary", use_container_width=False, key="ps_save"):
+            new_u = new_username.strip()
+            if not new_u:
+                st.error("Username cannot be empty.")
+            elif new_u != current_user and new_u in USERS:
+                st.error(f"Username **{new_u}** is already taken.")
+            else:
+                if new_u != current_user:
+                    USERS[new_u] = USERS.pop(current_user)
+                    _save_users(USERS)
+                    st.session_state.logged_in_user = new_u
+                st.success("✅ Profile updated successfully.")
+                st.rerun()
+
+    # ── Tab 2 : Change Password ────────────────────────────────────
+    with tab2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        cur_pass  = st.text_input("Current password", type="password",
+                                   placeholder="Enter current password", key="ps_cur")
+        new_pass  = st.text_input("New password", type="password",
+                                   placeholder="Min 6 characters", key="ps_new")
+        conf_pass = st.text_input("Confirm new password", type="password",
+                                   placeholder="Re-enter new password", key="ps_conf")
+
+        st.markdown("""
+<div style="background:rgba(255,79,31,.07);border:1px solid rgba(255,79,31,.2);
+            border-radius:10px;padding:.8rem 1rem;margin:.8rem 0;font-size:.9rem;color:#ff9070;">
+  🔒 Use at least 6 characters with a mix of letters and numbers.
+</div>""", unsafe_allow_html=True)
+
+        st.write("")
+        if st.button("🔑  Update Password", type="primary", use_container_width=False, key="ps_pw_save"):
+            if not cur_pass:
+                st.error("Please enter your current password.")
+            elif USERS.get(current_user) != _hash(cur_pass):
+                st.error("❌ Current password is incorrect.")
+            elif len(new_pass) < 6:
+                st.error("New password must be at least 6 characters.")
+            elif new_pass != conf_pass:
+                st.error("New passwords do not match.")
+            elif _hash(new_pass) == USERS.get(current_user):
+                st.error("New password must differ from the current one.")
+            else:
+                USERS[current_user] = _hash(new_pass)
+                _save_users(USERS)
+                st.success("✅ Password updated successfully.")
