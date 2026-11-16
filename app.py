@@ -153,9 +153,10 @@ p, li, span, div, label, td, th {
     line-height: 1;
 }
 .brand-name {
-    font-size: 2rem; font-weight: 800; letter-spacing: -.03em; color: #f0f0f5;
+    font-size: 2.4rem !important; font-weight: 800; letter-spacing: -.03em; color: #f0f0f5;
+    line-height: 1.1;
 }
-.brand-name span { color: #ff4f1f; }
+.brand-name span { color: #ff4f1f; font-size: 2.4rem !important; }
 .brand-tagline {
     font-size: .95rem; font-weight: 500; color: #c0c0e0;
     letter-spacing: .04em; margin-top: 4px;
@@ -663,7 +664,7 @@ with st.sidebar:
         </defs>
       </svg>
       <div>
-        <div class="brand-name">Spend<span>Wise</span> AI</div>
+        <div class="brand-name">Spend<span>Wise</span></div>
         <div class="brand-tagline">Personal Finance Intelligence</div>
       </div>
     </div>
@@ -864,32 +865,30 @@ if page == "Dashboard":
     _min_date = _all_exp["date"].min().date()
     _max_date = _all_exp["date"].max().date()
 
-    st.markdown('<div class="search-bar-wrap">', unsafe_allow_html=True)
-    s_col, d1_col, d2_col, clr_col = st.columns([3, 1.5, 1.5, 0.6])
-    with s_col:
-        dash_search = st.text_input(
-            "", placeholder="🔍  Search by description or category…",
-            key="dash_search", label_visibility="collapsed",
-        )
-    with d1_col:
-        date_from = st.date_input(
-            "From", value=_min_date, min_value=_min_date, max_value=_max_date,
-            key="dash_date_from", label_visibility="visible",
-        )
-    with d2_col:
-        date_to = st.date_input(
-            "To", value=_max_date, min_value=_min_date, max_value=_max_date,
-            key="dash_date_to", label_visibility="visible",
-        )
-    with clr_col:
-        st.markdown("<div style='padding-top:1.75rem'>", unsafe_allow_html=True)
-        if st.button("✕", key="dash_clear", help="Clear filters"):
-            st.session_state.dash_search  = ""
-            st.session_state.dash_date_from = _min_date
-            st.session_state.dash_date_to   = _max_date
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        s_col, d1_col, d2_col, clr_col = st.columns([3, 1.5, 1.5, 0.6])
+        with s_col:
+            dash_search = st.text_input(
+                "", placeholder="🔍  Search by description or category…",
+                key="dash_search", label_visibility="collapsed",
+            )
+        with d1_col:
+            date_from = st.date_input(
+                "From", value=_min_date, min_value=_min_date, max_value=_max_date,
+                key="dash_date_from",
+            )
+        with d2_col:
+            date_to = st.date_input(
+                "To", value=_max_date, min_value=_min_date, max_value=_max_date,
+                key="dash_date_to",
+            )
+        with clr_col:
+            st.write("")
+            if st.button("✕", key="dash_clear", help="Clear filters"):
+                st.session_state.dash_search    = ""
+                st.session_state.dash_date_from = _min_date
+                st.session_state.dash_date_to   = _max_date
+                st.rerun()
 
     # ── Apply filters ──────────────────────────────────────────────
     _active = dash_search.strip() or date_from != _min_date or date_to != _max_date
