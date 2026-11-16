@@ -163,10 +163,10 @@ p, li, span, div, label, td, th {
 }
 
 /* ── Nav radio ──────────────────────────────────────────────────── */
-[data-testid="stRadio"] > div { gap: 2px !important; }
+[data-testid="stRadio"] > div { gap: 4px !important; }
 [data-testid="stRadio"] label {
-    padding: .6rem 1rem !important; border-radius: 10px !important;
-    font-size: 1rem !important; font-weight: 500 !important;
+    padding: .7rem 1.1rem !important; border-radius: 10px !important;
+    font-size: 1.15rem !important; font-weight: 500 !important;
     color: #7070a0 !important; cursor: pointer;
     transition: background .15s, color .15s;
 }
