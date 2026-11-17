@@ -210,7 +210,7 @@ def llm_answer(q, intent, facts):
         return None
     client = anthropic.Anthropic()
     msg = client.messages.create(
-        model=os.environ.get("SPENDWISE_MODEL", "claude-sonnet-5-5"),
+        model=os.environ.get("SPENDWISE_MODEL", "claude-sonnet-4-6"),
         max_tokens=400, system=SYSTEM,
         messages=[{"role": "user", "content": f"Question: {q}\nIntent: {intent}\nFacts:\n{json.dumps(facts, default=str, indent=1)}"}],
     )
